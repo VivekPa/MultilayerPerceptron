@@ -15,7 +15,7 @@ class MLP(object):
         """
         return (1 + np.exp(-x)) ** (-1)
 
-    def __init__(self, learn, x, y):
+    def __init__(self, learn, x, y, itr):
         """
         :param learn: learning rate
         :type learn: float
@@ -31,7 +31,7 @@ class MLP(object):
         self.w1 = np.random.random((20, 20))
         self.w2 = np.random.random(20)
         self.sigmoid = np.vectorize(self.sigmoid)
-
+        self.itr = itr
 
     def train(self):
         """
@@ -40,26 +40,27 @@ class MLP(object):
         """
         self.error = []
         errors = 0
-        for xi, target in zip(self.x, self.y):
-            self.feedforward(xi)
-            cost = target.T - self.output3
+        for _ in range(self.itr):
+            for xi, target in zip(self.x, self.y):
+                self.feedforward(xi)
+                cost = target.T - self.output3
 
-            for i in range(self.w2.shape[0]):
-                self.w2[i] += -self.learn * cost.sum() * self.sigmoid(self.z2) * \
-                              (1 - self.sigmoid(self.z2)) * self.output2[i]
+                for i in range(self.w2.shape[0]):
+                    self.w2[i] += -self.learn * cost.sum() * self.sigmoid(self.z2) * \
+                                  (1 - self.sigmoid(self.z2)) * self.output2[i]
 
-            for i in range(self.w1.shape[0]):
-                for j in range(self.w1.shape[1]):
-                    self.w1[i, j] += -self.learn * cost.sum() * self.sigmoid(self.z2) * (1 - self.sigmoid(self.z2)) * self.w2[i] * \
-                               self.sigmoid(self.z1[i]) * (1 - self.sigmoid(self.z1[i])) * self.output1[i]
+                for i in range(self.w1.shape[0]):
+                    for j in range(self.w1.shape[1]):
+                        self.w1[i, j] += -self.learn * cost.sum() * self.sigmoid(self.z2) * (1 - self.sigmoid(self.z2)) * self.w2[i] * \
+                                         self.sigmoid(self.z1[i]) * (1 - self.sigmoid(self.z1[i])) * self.output1[j]
 
-            for i in range(self.w0.shape[0]):
-                for j in range(self.w0.shape[1]):
-                    self.w0[i, j] += -self.learn * cost.sum() * self.sigmoid(self.z2) * (1 - self.sigmoid(self.z2)) * self.w2[i] * \
-                                    self.sigmoid(self.z1[i]) * (1 - self.sigmoid(self.z1[i])) * self.w1[i, j] * \
-                                    self.sigmoid(self.z0[i]) * (1 - self.sigmoid(self.z0[i])) * xi[j]
+                for i in range(self.w0.shape[0]):
+                    for j in range(self.w0.shape[1]):
+                        self.w0[i, j] += -self.learn * cost.sum() * self.sigmoid(self.z2) * (1 - self.sigmoid(self.z2)) * self.w2[i] * \
+                                         self.sigmoid(self.z1[i]) * (1 - self.sigmoid(self.z1[i])) * self.w1[i, j] * \
+                                         self.sigmoid(self.z0[i]) * (1 - self.sigmoid(self.z0[i])) * xi[j]
 
-            errors = cost
+                errors = cost
         self.error.append(errors)
 
         return self
